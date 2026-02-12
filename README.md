@@ -21,19 +21,20 @@
 1. Установка MicroK8S:
     - sudo apt update,
     - sudo apt install snapd,
-    - sudo snap install microk8s --classic,
+    - sudo snap install microk8s --classic, (сделал так sudo snap install microk8s --classic --channel=1.32, т.к. на тот момент у новых версий была проблема с dashboard https://github.com/canonical/microk8s/issues/5381 
     - добавить локального пользователя в группу `sudo usermod -a -G microk8s $USER`,
     - изменить права на папку с конфигурацией `sudo chown -f -R $USER ~/.kube`.
 
 2. Полезные команды:
     - проверить статус `microk8s status --wait-ready`;
     - подключиться к microK8s и получить информацию можно через команду `microk8s command`, например, `microk8s kubectl get nodes`;
-    - включить addon можно через команду `microk8s enable`; 
+    - включить addon можно через команду `microk8s enable` (microk8s enable dashboard); 
     - список addon `microk8s status`;
     - вывод конфигурации `microk8s config`;
-    - проброс порта для подключения локально `microk8s kubectl port-forward -n kube-system service/kubernetes-dashboard 10443:443`.
+    - проброс порта для подключения локально `microk8s kubectl port-forward -n kube-system service/kubernetes-dashboard 8443:443` (сделал так `kubectl port-forward -n kube-system services/kubernetes-dashboard 8443:443  --address 0.0.0.0`, т.к. в противном случае port-forward слушает только на 127.0.0.1, а для внешнего Ip он не пробразывается)    
+    - получить токен для dashboard `microk8s kubectl create token default`.
 
-3. Настройка внешнего подключения:
+3. Настройка внешнего подключения: (Это чтобы внешний ip машины был добавлен в сертификат и при обращении к кластеру с локальной машины не получить `Unable to connect to the server: tls: failed to verify certificate`)
     - отредактировать файл /var/snap/microk8s/current/certs/csr.conf.template
     ```shell
     # [ alt_names ]
@@ -46,8 +47,8 @@
     - curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/linux/amd64/kubectl;
     - chmod +x ./kubectl;
     - sudo mv ./kubectl /usr/local/bin/kubectl;
-    - настройка автодополнения в текущую сессию `bash source <(kubectl completion bash)`;
-    - добавление автодополнения в командную оболочку bash `echo "source <(kubectl completion bash)" >> ~/.bashrc`.
+    - настройка автодополнения в текущую сессию `bash source <(kubectl completion bash)` (эта команда выдавала ошибку);
+    - добавление автодополнения в командную оболочку bash `echo "source <(kubectl completion bash)" >> ~/.bashrc` (выполнил только эту, далее можно перезайти в консоль, либо сделать `source ~/.bashrc`).
 
 ------
 
@@ -79,3 +80,9 @@
 1. Домашняя работа оформляется в своём Git-репозитории в файле README.md. Выполненное домашнее задание пришлите ссылкой на .md-файл в вашем репозитории.
 2. Файл README.md должен содержать скриншоты вывода команд `kubectl get nodes` и скриншот дашборда.
 
+`kubectl get nodes`:
+![kubectl get nodes](./img/kubectl.PNG)
+
+dashboard:
+
+![dashboard](./img/dashboard.PNG)
